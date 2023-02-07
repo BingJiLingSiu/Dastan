@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dastan
 {
@@ -250,7 +251,12 @@ namespace Dastan
                 int Choice;
                 do
                 {
-                    Console.Write("Choose move option to use from queue (1 to 3) or 9 to take the offer: ");
+                    // Q4 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
+                    List<string> Extras = new List<string>();
+                    Extras.Add("or 9 to take the offer");
+                    if (CurrentPlayer.GetSpaceJumpState()) Extras.Add("or 8 for space jump");
+                    Console.Write($"Choose move option to use from queue (1 to 3) {String.Join(" ", Extras.ToArray())}: ");
+                    // Q4 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
                     Choice = Convert.ToInt32(Console.ReadLine());
                     if (Choice == 9)
                     {
@@ -258,7 +264,7 @@ namespace Dastan
                         DisplayState();
                     }
                 }
-                while (Choice < 1 || Choice > 3);
+                while (!(Choice != 1 || Choice != 2 || Choice != 3 || Choice != 8)); // Q4 - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
                 int StartSquareReference = 0;
                 while (!SquareIsValid)
                 {
@@ -266,28 +272,49 @@ namespace Dastan
                     SquareIsValid = CheckSquareIsValid(StartSquareReference, true);
                 }
                 int FinishSquareReference = 0;
-                SquareIsValid = false;
-                while (!SquareIsValid)
+                if (Choice != 8) // Q4 - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
                 {
-                    FinishSquareReference = GetSquareReference("to move to");
-                    SquareIsValid = CheckSquareIsValid(FinishSquareReference, false);
-                }
-                bool MoveLegal = CurrentPlayer.CheckPlayerMove(Choice, StartSquareReference, FinishSquareReference);
-                if (MoveLegal)
-                {
+                    SquareIsValid = false;
+                    // Q3 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_3
+                    bool MoveLegal = false;
+                    while (!(SquareIsValid && MoveLegal))
+                    {
+                        FinishSquareReference = GetSquareReference("to move to");
+                        SquareIsValid = CheckSquareIsValid(FinishSquareReference, false);
+
+                        MoveLegal = CurrentPlayer.CheckPlayerMove(Choice, StartSquareReference, FinishSquareReference);
+                    
+                        if (!MoveLegal)
+                            Console.WriteLine("Cannot move to that square with this move");
+                    
+                        if (!SquareIsValid)
+                            Console.WriteLine("Invalid position");
+                    }
                     int PointsForPieceCapture = CalculatePieceCapturePoints(FinishSquareReference);
                     CurrentPlayer.ChangeScore(-(Choice + (2 * (Choice - 1))));
                     CurrentPlayer.UpdateQueueAfterMove(Choice);
                     UpdateBoard(StartSquareReference, FinishSquareReference);
                     UpdatePlayerScore(PointsForPieceCapture);
                     Console.WriteLine("New score: " + CurrentPlayer.GetScore() + Environment.NewLine);
+                    // Q3 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_3
                 }
-                // Q2 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_2
+                // Q4 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
                 else
                 {
-                    Console.WriteLine("\x1b[31;1mIllegal Move ({0}, {1})\x1b[0;0m", StartSquareReference, FinishSquareReference);
+                    do
+                    {
+                        FinishSquareReference = RGen.Next(1, NoOfRows) * 10 + RGen.Next(1, NoOfColumns);
+                        SquareIsValid = CheckSquareIsValid(FinishSquareReference, false);
+                    } while (FinishSquareReference == StartSquareReference && !SquareIsValid);
+                    int PointsForPieceCapture = CalculatePieceCapturePoints(FinishSquareReference);
+                    CurrentPlayer.ChangeScore(-(Choice + (2 * (Choice - 1))));
+                    UpdateBoard(StartSquareReference, FinishSquareReference);
+                    UpdatePlayerScore(PointsForPieceCapture);
+                    Console.WriteLine("New score: " + CurrentPlayer.GetScore() + Environment.NewLine);
+                    
+                    CurrentPlayer.UseSpaceJump();
                 }
-                // Q2 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_2
+                // Q4 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
                 if (CurrentPlayer.SameAs(Players[0]))
                 {
                     CurrentPlayer = Players[1];
@@ -813,6 +840,7 @@ namespace Dastan
         private string Name;
         private int Direction, Score;
         private MoveOptionQueue Queue = new MoveOptionQueue();
+        private bool hasSpaceJump = true; 
 
         public Player(string N, int D)
         {
@@ -836,6 +864,18 @@ namespace Dastan
                 return false;
             }
         }
+
+        // Q4 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
+        public bool GetSpaceJumpState()
+        {
+            return hasSpaceJump;
+        }
+
+        public void UseSpaceJump()
+        {
+            hasSpaceJump = false;
+        }
+        // Q4 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
 
         public string GetPlayerStateAsString()
         {
