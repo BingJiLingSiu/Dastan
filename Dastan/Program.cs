@@ -54,7 +54,7 @@ namespace Dastan
             Players.Add(new Player(playertwo, -1));
         }
         // task 1 - end
-
+        
         private void DisplayBoard()
         {
             Console.Write(Environment.NewLine + "   ");
@@ -77,6 +77,54 @@ namespace Dastan
                     Console.Write("|" + Board[Index].GetSymbol());
                     Piece PieceInSquare = Board[Index].GetPieceInSquare();
                     if (PieceInSquare == null)
+                    {
+                        Console.Write(" ");
+                    }
+                    else
+                    {
+                        Console.Write(PieceInSquare.GetSymbol());
+                    }
+                }
+                Console.WriteLine("|");
+            }
+            Console.Write("  -");
+            for (int Column = 1; Column <= NoOfColumns; Column++)
+            {
+                Console.Write("---");
+            }
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+        
+        private void DisplayBoardMoveOptions(int Choice, int StartSquareReference)
+        {
+            Console.Write(Environment.NewLine + "   ");
+            for (int Column = 1; Column <= NoOfColumns; Column++)
+            {
+                Console.Write(Column.ToString() + "  ");
+            }
+            Console.Write(Environment.NewLine + "  ");
+            for (int Count = 1; Count <= NoOfColumns; Count++)
+            {
+                Console.Write("---");
+            }
+            Console.WriteLine("-");
+            for (int Row = 1; Row <= NoOfRows; Row++)
+            {
+                Console.Write(Row.ToString() + " ");
+                for (int Column = 1; Column <= NoOfColumns; Column++)
+                {
+                    int Index = GetIndexOfSquare(Row * 10 + Column);
+                    Console.Write("|" + Board[Index].GetSymbol());
+                    Piece PieceInSquare = Board[Index].GetPieceInSquare();
+                    // Q6 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Show_where_the_piece_can_move
+                    if (CheckSquareIsValid(Row * 10 + Column, false) &&
+                        CurrentPlayer.CheckPlayerMove(Choice, StartSquareReference, Row * 10 + Column))
+                    {
+                        Console.Write("^");
+                    }
+                    // Q6 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Show_where_the_piece_can_move
+                    else if (PieceInSquare == null)
                     {
                         Console.Write(" ");
                     }
@@ -275,6 +323,7 @@ namespace Dastan
                 if (Choice != 8) // Q4 - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_4
                 {
                     SquareIsValid = false;
+                    DisplayBoardMoveOptions(Choice, StartSquareReference); // Q6 - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Show_where_the_piece_can_move
                     // Q3 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_3
                     bool MoveLegal = false;
                     while (!(SquareIsValid && MoveLegal))
