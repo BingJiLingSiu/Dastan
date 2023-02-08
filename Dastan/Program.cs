@@ -669,6 +669,7 @@ namespace Dastan
             Players[0].AddToMoveOptionQueue(CreateMoveOption("cuirassier", 1));
             Players[0].AddToMoveOptionQueue(CreateMoveOption("faujdar", 1));
             Players[0].AddToMoveOptionQueue(CreateMoveOption("jazair", 1));
+            Players[0].ShuffleQueue();
 
             Players[1].AddToMoveOptionQueue(CreateMoveOption("tibblecross", -1)); // Q1 - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_1
             Players[1].AddToMoveOptionQueue(CreateMoveOption("rook", -1)); // Q2 - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Question_2
@@ -679,6 +680,7 @@ namespace Dastan
             Players[1].AddToMoveOptionQueue(CreateMoveOption("jazair", -1));
             Players[1].AddToMoveOptionQueue(CreateMoveOption("faujdar", -1));
             Players[1].AddToMoveOptionQueue(CreateMoveOption("cuirassier", -1));
+            Players[1].ShuffleQueue();
         }
     }
 
@@ -876,7 +878,22 @@ namespace Dastan
     class MoveOptionQueue
     {
         private List<MoveOption> Queue = new List<MoveOption>();
+        Random rng = new Random(); // Q7 - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Random_start_queue
 
+        // Q7 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Random_start_queue
+        public void Shuffle()
+        {
+            // Shuffle based on Fisher-Yates shuffle (https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
+            int n = Queue.Count;
+            while (n > 1)
+            {
+                n--;
+                int R = rng.Next(n + 1);
+                (Queue[R], Queue[n]) = (Queue[n], Queue[R]);
+            }
+        }
+        // Q7 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Random_start_queue
+        
         public string GetQueueAsString()
         {
             string QueueAsString = "";
@@ -925,6 +942,13 @@ namespace Dastan
             Name = N;
             Direction = D;
         }
+
+        // Q7 start - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Random_start_queue
+        public void ShuffleQueue()
+        {
+            Queue.Shuffle();
+        }
+        // Q7 end - https://en.wikibooks.org/wiki/A-level_Computing/AQA/Paper_1/Skeleton_program/2023#Random_start_queue
 
         public bool SameAs(Player APlayer)
         {
